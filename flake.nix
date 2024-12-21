@@ -13,7 +13,18 @@
           inherit system;
         };
         pythonEnv = pkgs.python3.withPackages (ps: with ps; [
+          requests
         ]);
+        helloPackage = pkgs.python3Packages.buildPythonPackage {
+          pname = "hello";
+          version = "0.1.0";
+          src = ./.;
+          format = "pyproject";
+          
+          nativeBuildInputs = with pkgs.python3Packages; [
+            setuptools
+          ];
+        };
       in
       {
         devShells.default = pkgs.mkShell {
@@ -21,5 +32,6 @@
             pythonEnv
           ];
         };
+        defaultPackage = helloPackage;
       });
 }
