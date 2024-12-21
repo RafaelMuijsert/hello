@@ -12,24 +12,31 @@
         pkgs = import nixpkgs {
           inherit system;
         };
-        pythonEnv = pkgs.python3.withPackages (ps: with ps; [
+
+        # Define dependencies in one place
+        pythonDeps = ps: with ps; [
           requests
-        ]);
+        ];
+
         helloPackage = pkgs.python3Packages.buildPythonPackage {
           pname = "hello";
           version = "0.1.0";
           src = ./.;
           format = "pyproject";
-          
+
           nativeBuildInputs = with pkgs.python3Packages; [
             setuptools
           ];
+
+          # Use shared dependencies here
+          propagatedBuildInputs = pythonDeps pkgs.python3Packages;
         };
       in
       {
         devShells.default = pkgs.mkShell {
+          # Use shared dependencies here
           buildInputs = with pkgs; [
-            pythonEnv
+            (pkgs.python3.withPackages (pythonDeps))
           ];
         };
         defaultPackage = helloPackage;
